@@ -1,6 +1,18 @@
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Undo2, RotateCcw, ListOrdered, Copy, Check, ArrowLeft, Trophy, Upload, Edit3, X, Moon, Sun } from 'lucide-react';
+import {
+  Undo2,
+  RotateCcw,
+  ListOrdered,
+  Copy,
+  Check,
+  ArrowLeft,
+  Trophy,
+  Upload,
+  Edit3,
+  X,
+  Moon,
+  Sun
+} from 'lucide-react';
 import Papa from 'papaparse';
 import { useDropzone } from 'react-dropzone';
 import { saveImages, loadImages, clearImages } from './imageStore';
@@ -24,7 +36,14 @@ function shuffleIndices(n) {
 
 function initRuntime_full(coasters) {
   const queue = coasters.map(c => [c]);
-  let state = { mode: 'full', queue, currentMerge: null, comparisonCount: 0, done: false, finalRanking: null };
+  let state = {
+    mode: 'full',
+    queue,
+    currentMerge: null,
+    comparisonCount: 0,
+    done: false,
+    finalRanking: null
+  };
   if (state.queue.length >= 2) {
     const left = state.queue.shift();
     const right = state.queue.shift();
@@ -42,6 +61,7 @@ function initRuntime_full(coasters) {
 function applyChoice_full(state, choice) {
   if (!state.currentMerge) return state;
   if (choice !== 'l' && choice !== 'r') return state;
+
   let queue = [...state.queue];
   let merge = {
     left: state.currentMerge.left,
@@ -57,6 +77,7 @@ function applyChoice_full(state, choice) {
     merge.result.push(merge.right[merge.rightIdx]);
     merge.rightIdx++;
   }
+
   let comparisonCount = state.comparisonCount + 1;
   let currentMerge = merge;
   let done = false;
@@ -73,6 +94,7 @@ function applyChoice_full(state, choice) {
     } else {
       break;
     }
+
     if (queue.length >= 2) {
       const left = queue.shift();
       const right = queue.shift();
@@ -83,6 +105,7 @@ function applyChoice_full(state, choice) {
       break;
     }
   }
+
   return { mode: 'full', queue, currentMerge, comparisonCount, done, finalRanking };
 }
 
@@ -237,10 +260,15 @@ export default function App() {
     localStorage.setItem('cr-theme', theme);
   }, [theme]);
 
-
   const runtimeState = useMemo(() => {
     if (!saveData || !coasters) return null;
-    return reconstructState(saveData.initialShuffle, saveData.choices, saveData.mode, saveData.k, coasters);
+    return reconstructState(
+      saveData.initialShuffle,
+      saveData.choices,
+      saveData.mode,
+      saveData.k,
+      coasters
+    );
   }, [saveData, coasters]);
 
   const currentComparison = useMemo(() => getCurrentComparison(runtimeState), [runtimeState]);
@@ -286,7 +314,7 @@ export default function App() {
       setView('final');
     }
   }, [runtimeState, view]);
-  
+
   const updateCoaster = useCallback((id, updates) => {
     setCoasters(prev => prev ? prev.map(c => c.id === id ? { ...c, ...updates } : c) : prev);
   }, []);
@@ -330,7 +358,7 @@ export default function App() {
     setView('compare');
     localStorage.removeItem(STORAGE_KEY);
   }
-  
+
   function handleResetAll() {
     setCoasters(null);
     setSaveData(null);
@@ -362,9 +390,16 @@ export default function App() {
     function onKey(e) {
       if (view !== 'compare') return;
       if (!runtimeState || runtimeState.done) return;
-      if (e.key === 'ArrowLeft' || e.key === '1') { e.preventDefault(); handleChoice('l'); }
-      else if (e.key === 'ArrowRight' || e.key === '2') { e.preventDefault(); handleChoice('r'); }
-      else if (e.key === 'u' || e.key === 'U') { e.preventDefault(); handleUndo(); }
+      if (e.key === 'ArrowLeft' || e.key === '1') {
+        e.preventDefault();
+        handleChoice('l');
+      } else if (e.key === 'ArrowRight' || e.key === '2') {
+        e.preventDefault();
+        handleChoice('r');
+      } else if (e.key === 'u' || e.key === 'U') {
+        e.preventDefault();
+        handleUndo();
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -372,54 +407,92 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="cr-app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        className="cr-app"
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
         <div className="cr-meta">Loading...</div>
       </div>
     );
   }
-  
+
   if (view === 'fetching') {
     const pct = Math.round((fetchingState.current / fetchingState.total) * 100) || 0;
     return (
-      <div className="cr-app" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-        <h2 className="cr-display" style={{fontSize: 40}}>LOADING<span className="cr-dots"></span></h2>
-        <div className="cr-meta" style={{marginBottom: 20}}>Fetching images and details</div>
-        <div className="cr-progress-track" style={{width: 300, maxWidth: '80%'}}>
+      <div
+        className="cr-app"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column'
+        }}
+      >
+        <h2 className="cr-display" style={{ fontSize: 40 }}>
+          LOADING<span className="cr-dots"></span>
+        </h2>
+        <div className="cr-meta" style={{ marginBottom: 20 }}>
+          Fetching images and details
+        </div>
+        <div className="cr-progress-track" style={{ width: 300, maxWidth: '80%' }}>
           <div className="cr-progress-fill" style={{ width: `${pct}%` }} />
         </div>
-        <div className="cr-meta" style={{marginTop: 10}}>{fetchingState.current} / {fetchingState.total} Coasters</div>
+        <div className="cr-meta" style={{ marginTop: 10 }}>
+          {fetchingState.current} / {fetchingState.total} Coasters
+        </div>
       </div>
     );
   }
-
 
   if (view === 'rank-more') {
     return (
       <div className="cr-app">
         <div className="cr-grid-bg" />
         <div className="cr-glow-bg" />
-        <div style={{ position: 'relative', maxWidth: '900px', margin: '0 auto', padding: '20px 16px 32px' }}>
-          <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '20px 16px 32px'
+          }}
+        >
+          <header
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: 22
+            }}
+          >
             <h1 className="cr-display" style={{ fontSize: 26, letterSpacing: '0.05em', margin: 0 }}>
               COASTER<span className="cr-text-red">/</span>RANKER
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {theme === 'light' ? 
-                <Moon size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('dark')} /> : 
-                <Sun size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('light')} />}
+              {theme === 'light' ? (
+                <Moon size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('dark')} />
+              ) : (
+                <Sun size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('light')} />
+              )}
               <div className="cr-meta">N={coasters.length}</div>
             </div>
           </header>
-          <button onClick={() => setView('compare')} className="cr-btn" style={{marginBottom: 20}}>← Cancel</button>
-          <ModeSelector 
-            n={coasters.length} 
+          <button
+            onClick={() => setView('compare')}
+            className="cr-btn"
+            style={{ marginBottom: 20 }}
+          >
+            ← Cancel
+          </button>
+          <ModeSelector
+            n={coasters.length}
             minK={saveData.mode === 'topK' ? saveData.k : 9999}
             onStart={(newMode, newK) => {
               const newSave = { ...saveData, mode: newMode, k: newK };
               setSaveData(newSave);
               persist(newSave);
               setView('compare');
-            }} 
+            }}
           />
         </div>
       </div>
@@ -431,51 +504,75 @@ export default function App() {
       <div className="cr-app">
         <div className="cr-grid-bg" />
         <div className="cr-glow-bg" />
-        <div style={{ position: 'relative', maxWidth: '900px', margin: '0 auto', padding: '20px 16px 32px' }}>
-          <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '20px 16px 32px'
+          }}
+        >
+          <header
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: 22
+            }}
+          >
             <h1 className="cr-display" style={{ fontSize: 26, letterSpacing: '0.05em', margin: 0 }}>
               COASTER<span className="cr-text-red">/</span>RANKER
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {theme === 'light' ? 
-                <Moon size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('dark')} /> : 
-                <Sun size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('light')} />}
-
+              {theme === 'light' ? (
+                <Moon size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('dark')} />
+              ) : (
+                <Sun size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('light')} />
+              )}
             </div>
           </header>
-          <SetupView onReady={async (c) => {
-            setFetchingState({ active: true, current: 0, total: c.length });
-            setView('fetching');
-            let enriched = [...c];
-            
-            for (let i = 0; i < c.length; i += 3) {
-              const chunk = c.slice(i, i+3);
-              const promises = chunk.map(coaster => 
-                fetch('/api/fetch_coaster', {
-                  method: 'POST',
-                  headers: {'Content-Type': 'application/json'},
-                  body: JSON.stringify(coaster)
-                }).then(r => r.json())
-                .then(data => {
-                   setFetchingState(prev => ({...prev, current: prev.current + 1}));
-                   if (data.image || data.type) {
-                     return { ...coaster, image: data.image || null, type: data.type || coaster.type, fetched: true };
-                   }
-                   return { ...coaster, fetched: true };
-                }).catch(() => {
-                   setFetchingState(prev => ({...prev, current: prev.current + 1}));
-                   return { ...coaster, fetched: true };
-                })
-              );
-              const results = await Promise.all(promises);
-              for (let j = 0; j < results.length; j++) {
-                enriched[i+j] = results[j];
+          <SetupView
+            onReady={async (c) => {
+              setFetchingState({ active: true, current: 0, total: c.length });
+              setView('fetching');
+              let enriched = [...c];
+
+              for (let i = 0; i < c.length; i += 3) {
+                const chunk = c.slice(i, i + 3);
+                const promises = chunk.map(coaster =>
+                  fetch('/api/fetch_coaster', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(coaster)
+                  })
+                    .then(r => r.json())
+                    .then(data => {
+                      setFetchingState(prev => ({ ...prev, current: prev.current + 1 }));
+                      if (data.image || data.type) {
+                        return {
+                          ...coaster,
+                          image: data.image || null,
+                          type: data.type || coaster.type,
+                          fetched: true
+                        };
+                      }
+                      return { ...coaster, fetched: true };
+                    })
+                    .catch(() => {
+                      setFetchingState(prev => ({ ...prev, current: prev.current + 1 }));
+                      return { ...coaster, fetched: true };
+                    })
+                );
+                const results = await Promise.all(promises);
+                for (let j = 0; j < results.length; j++) {
+                  enriched[i + j] = results[j];
+                }
+                setCoasters([...enriched]);
               }
-              setCoasters([...enriched]);
-            }
-            setFetchingState({ active: false, current: 0, total: 0 });
-            setView('compare'); 
-          }} />
+              setFetchingState({ active: false, current: 0, total: 0 });
+              setView('compare');
+            }}
+          />
         </div>
       </div>
     );
@@ -486,20 +583,38 @@ export default function App() {
       <div className="cr-app">
         <div className="cr-grid-bg" />
         <div className="cr-glow-bg" />
-        <div style={{ position: 'relative', maxWidth: '900px', margin: '0 auto', padding: '20px 16px 32px' }}>
-          <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22 }}>
+        <div
+          style={{
+            position: 'relative',
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '20px 16px 32px'
+          }}
+        >
+          <header
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              marginBottom: 22
+            }}
+          >
             <h1 className="cr-display" style={{ fontSize: 26, letterSpacing: '0.05em', margin: 0 }}>
               COASTER<span className="cr-text-red">/</span>RANKER
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {theme === 'light' ? 
-                <Moon size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('dark')} /> : 
-                <Sun size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('light')} />}
+              {theme === 'light' ? (
+                <Moon size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('dark')} />
+              ) : (
+                <Sun size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('light')} />
+              )}
 
               <div className="cr-meta">N={coasters.length}</div>
             </div>
           </header>
-          <button onClick={handleResetAll} className="cr-btn" style={{marginBottom: 20}}>← Change List</button>
+          <button onClick={handleResetAll} className="cr-btn" style={{ marginBottom: 20 }}>
+            ← Change List
+          </button>
           <ModeSelector n={coasters.length} onStart={startWithMode} />
         </div>
       </div>
@@ -515,46 +630,76 @@ export default function App() {
     <div className="cr-app">
       <div className="cr-grid-bg" />
       <div className="cr-glow-bg" />
-      <div style={{ position: 'relative', maxWidth: '1100px', margin: '0 auto', padding: '20px 16px 32px' }}>
-        <header style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 22 }}>
+      <div
+        style={{
+          position: 'relative',
+          maxWidth: '1100px',
+          margin: '0 auto',
+          padding: '20px 16px 32px'
+        }}
+      >
+        <header
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            marginBottom: 22
+          }}
+        >
           <h1 className="cr-display" style={{ fontSize: 26, letterSpacing: '0.05em', margin: 0 }}>
             COASTER<span className="cr-text-red">/</span>RANKER
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              {theme === 'light' ? 
-                <Moon size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('dark')} /> : 
-                <Sun size={18} style={{cursor: 'pointer'}} onClick={() => setTheme('light')} />}
+            {theme === 'light' ? (
+              <Moon size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('dark')} />
+            ) : (
+              <Sun size={18} style={{ cursor: 'pointer' }} onClick={() => setTheme('light')} />
+            )}
 
-            <div className="cr-meta">{modeLabel} · N={coasters.length}</div>
+            <div className="cr-meta">
+              {modeLabel} · N={coasters.length}
+            </div>
           </div>
         </header>
 
         <div style={{ marginBottom: 22 }}>
-          <div className="cr-meta" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+          <div
+            className="cr-meta"
+            style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}
+          >
             <span>Comparisons</span>
-            <span key={keyPulse} className="cr-pulse">{count} / ~{total}</span>
+            <span key={keyPulse} className="cr-pulse">
+              {count} / ~{total}
+            </span>
           </div>
           <div className="cr-progress-track">
             <div className="cr-progress-fill" style={{ width: `${pct}%` }} />
           </div>
         </div>
 
-        {view === 'compare' && currentComparison && currentComparison.left && currentComparison.right && (
-          <CompareView
-            left={currentComparison.left}
-            right={currentComparison.right}
-            onChoose={handleChoice}
-            keyPulse={keyPulse}
-            onUpdateCoaster={updateCoaster}
+        {view === 'compare' &&
+          currentComparison &&
+          currentComparison.left &&
+          currentComparison.right && (
+            <CompareView
+              left={currentComparison.left}
+              right={currentComparison.right}
+              onChoose={handleChoice}
+              keyPulse={keyPulse}
+              onUpdateCoaster={updateCoaster}
+            />
+          )}
+
+        {view === 'standings' && (
+          <StandingsView
+            state={runtimeState}
+            onBack={() => setView('compare')}
+            coasters={coasters}
           />
         )}
 
-        {view === 'standings' && (
-          <StandingsView state={runtimeState} onBack={() => setView('compare')} coasters={coasters} />
-        )}
-
         {view === 'final' && runtimeState.done && (
-                    <FinalView 
+          <FinalView
             ranking={runtimeState.finalRanking}
             mode={saveData.mode}
             k={saveData.k}
@@ -571,7 +716,11 @@ export default function App() {
 
         {view === 'compare' && (
           <footer style={{ marginTop: 24, display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            <button onClick={handleUndo} disabled={saveData.choices.length === 0} className="cr-btn">
+            <button
+              onClick={handleUndo}
+              disabled={saveData.choices.length === 0}
+              className="cr-btn"
+            >
               <Undo2 size={12} /> Undo
             </button>
             <button onClick={() => setView('standings')} className="cr-btn">
@@ -593,14 +742,40 @@ export default function App() {
       {showResetConfirm && (
         <div className="cr-modal-bg" onClick={() => setShowResetConfirm(false)}>
           <div className="cr-modal" onClick={e => e.stopPropagation()}>
-            <h3 className="cr-display" style={{ fontSize: 22, letterSpacing: '0.05em', margin: '0 0 12px' }}>RESET ALL PROGRESS?</h3>
-            <p className="cr-text-soft" style={{ fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
+            <h3
+              className="cr-display"
+              style={{ fontSize: 22, letterSpacing: '0.05em', margin: '0 0 12px' }}
+            >
+              RESET ALL PROGRESS?
+            </h3>
+            <p
+              className="cr-text-soft"
+              style={{ fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}
+            >
               This erases all {count} comparisons.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setShowResetConfirm(false)} className="cr-btn" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
-              <button onClick={handleResetAll} className="cr-btn danger" style={{ flex: 1, justifyContent: 'center' }}>New List</button>
-              <button onClick={handleReset} className="cr-btn reset-primary" style={{ flex: 1, justifyContent: 'center' }}>Reset Rank</button>
+              <button
+                onClick={() => setShowResetConfirm(false)}
+                className="cr-btn"
+                style={{ flex: 1, justifyContent: 'center' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleResetAll}
+                className="cr-btn danger"
+                style={{ flex: 1, justifyContent: 'center' }}
+              >
+                New List
+              </button>
+              <button
+                onClick={handleReset}
+                className="cr-btn reset-primary"
+                style={{ flex: 1, justifyContent: 'center' }}
+              >
+                Reset Rank
+              </button>
             </div>
           </div>
         </div>
@@ -612,7 +787,7 @@ export default function App() {
 function SetupView({ onReady }) {
   const [text, setText] = useState('');
   const [error, setError] = useState('');
-  
+
   const processText = (content) => {
     let parsed = [];
     if (content.trim().startsWith('[') || content.trim().startsWith('{')) {
@@ -620,7 +795,7 @@ function SetupView({ onReady }) {
         const json = JSON.parse(content);
         if (Array.isArray(json)) {
           parsed = json.map((c, i) => ({
-            id: c.id || i+1,
+            id: c.id || i + 1,
             name: c.name || 'Unknown',
             park: c.park || '',
             type: c.type || ''
@@ -634,7 +809,7 @@ function SetupView({ onReady }) {
       const result = Papa.parse(content, { header: true, skipEmptyLines: true });
       if (result.data && result.data.length > 0 && result.data[0].name) {
         parsed = result.data.map((c, i) => ({
-          id: i+1,
+          id: i + 1,
           name: c.name || c.Name || c.coaster || c.Coaster || 'Unknown',
           park: c.park || c.Park || '',
           type: c.type || c.Type || ''
@@ -645,7 +820,7 @@ function SetupView({ onReady }) {
           let name = l;
           let park = '';
           let type = '';
-          
+
           // Match "Rank. Name (Type) — Park" or "Name (Type) - Park".
           // The separating dash must have whitespace on both sides: plenty of
           // rides have a hyphen in the name itself ("Centi-Speed"), and a bare
@@ -667,11 +842,11 @@ function SetupView({ onReady }) {
             // Strip leading rank if it's just "1. Name"
             name = name.replace(/^\d+\.\s*/, '').trim();
           }
-          return { id: i+1, name, park, type };
+          return { id: i + 1, name, park, type };
         });
       }
     }
-    
+
     if (parsed.length < 2) {
       setError('Found fewer than 2 coasters. Make sure your list is formatted correctly.');
       return;
@@ -689,36 +864,54 @@ function SetupView({ onReady }) {
     reader.readAsText(file);
   }, [onReady]);
 
-  const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   return (
     <div className="cr-fadein">
-      <h2 className="cr-display" style={{ fontSize: 32, letterSpacing: '0.05em', margin: '0 0 4px' }}>IMPORT COASTERS</h2>
+      <h2
+        className="cr-display"
+        style={{ fontSize: 32, letterSpacing: '0.05em', margin: '0 0 4px' }}
+      >
+        IMPORT COASTERS
+      </h2>
       <p className="cr-text-soft" style={{ fontSize: 14, margin: '0 0 20px' }}>
         Paste a list of coasters, a CSV (with name, park columns), or JSON array.
       </p>
-      
-      <div {...getRootProps()} style={{
-        border: '2px dashed var(--border)', padding: 30, textAlign: 'center', marginBottom: 20,
-        backgroundColor: isDragActive ? 'var(--surface-hi)' : 'var(--surface)', cursor: 'pointer'
-      }}>
+
+      <div
+        {...getRootProps()}
+        style={{
+          border: '2px dashed var(--border)',
+          padding: 30,
+          textAlign: 'center',
+          marginBottom: 20,
+          backgroundColor: isDragActive ? 'var(--surface-hi)' : 'var(--surface)',
+          cursor: 'pointer'
+        }}
+      >
         <input {...getInputProps()} />
-        <Upload size={32} className="cr-text-amber" style={{marginBottom: 10}}/>
+        <Upload size={32} className="cr-text-amber" style={{ marginBottom: 10 }} />
         <div className="cr-meta">Drag & Drop a file here, or click to select</div>
       </div>
-      
-      <div style={{textAlign: 'center', marginBottom: 20}} className="cr-meta">OR PASTE TEXT</div>
-      
-      <textarea 
-        className="cr-input" 
-        style={{height: 150, resize: 'vertical'}}
+
+      <div style={{ textAlign: 'center', marginBottom: 20 }} className="cr-meta">
+        OR PASTE TEXT
+      </div>
+
+      <textarea
+        className="cr-input"
+        style={{ height: 150, resize: 'vertical' }}
         placeholder="Name @ Park
 Fury 325 @ Carowinds
 Millennium Force @ Cedar Point"
         value={text}
         onChange={e => setText(e.target.value)}
       />
-      {error && <div className="cr-text-red cr-meta" style={{marginBottom: 10}}>{error}</div>}
+      {error && (
+        <div className="cr-text-red cr-meta" style={{ marginBottom: 10 }}>
+          {error}
+        </div>
+      )}
       <button className="cr-btn primary" onClick={() => processText(text)}>
         Import List
       </button>
@@ -730,24 +923,46 @@ function ModeSelector({ n, onStart, minK = 0 }) {
   const opts = [];
   opts.push({ label: 'FULL RANKING', desc: `Complete 1 → ${n} ordering.`, mode: 'full', k: 0 });
   for (const k of [50, 25, 10]) {
-    if (k < n && k > minK) opts.push({ label: `TOP ${k}`, desc: `Find and rank just your top ${k}.`, mode: 'topK', k });
+    if (k < n && k > minK)
+      opts.push({ label: `TOP ${k}`, desc: `Find and rank just your top ${k}.`, mode: 'topK', k });
   }
   return (
     <div className="cr-fadein">
-      <h2 className="cr-display" style={{ fontSize: 32, letterSpacing: '0.05em', margin: '0 0 4px' }}>SELECT MODE</h2>
+      <h2
+        className="cr-display"
+        style={{ fontSize: 32, letterSpacing: '0.05em', margin: '0 0 4px' }}
+      >
+        SELECT MODE
+      </h2>
       <p className="cr-text-soft" style={{ fontSize: 14, margin: '0 0 20px' }}>
         How precise do you want to be? Estimates assume ~4 seconds per pick.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 10 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: 10
+        }}
+      >
         {opts.map(o => {
           const cmps = estimateComparisons(n, o.mode, o.k);
           const mins = estimateMinutes(cmps);
           return (
-            <button key={o.label + o.k} onClick={() => onStart(o.mode, o.k)} className="cr-mode-card">
-              <div className="cr-display" style={{ fontSize: 28, letterSpacing: '0.04em', marginBottom: 4 }}>
+            <button
+              key={o.label + o.k}
+              onClick={() => onStart(o.mode, o.k)}
+              className="cr-mode-card"
+            >
+              <div
+                className="cr-display"
+                style={{ fontSize: 28, letterSpacing: '0.04em', marginBottom: 4 }}
+              >
                 {o.label}
               </div>
-              <div className="cr-text-soft" style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.4 }}>
+              <div
+                className="cr-text-soft"
+                style={{ fontSize: 13, marginBottom: 14, lineHeight: 1.4 }}
+              >
                 {o.desc}
               </div>
               <div className="cr-meta cr-text-amber" style={{ fontSize: 11 }}>
@@ -801,26 +1016,26 @@ const noopUpdate = () => {};
 
 function CoasterImage({ coaster, onUpdate }) {
   const [failed, setFailed] = useState(false);
-  
+
   useEffect(() => {
     if (!coaster.image && !coaster.fetched) {
       // mark as fetched so we don't spam
       onUpdate(coaster.id, { fetched: true });
       fetch('/api/fetch_coaster', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(coaster)
       })
-      .then(r => r.json())
-      .then(data => {
-         if (data.image || data.type) {
-           onUpdate(coaster.id, { 
-             image: data.image || null,
-             type: data.type || coaster.type
-           });
-         }
-      })
-      .catch(() => {});
+        .then(r => r.json())
+        .then(data => {
+          if (data.image || data.type) {
+            onUpdate(coaster.id, {
+              image: data.image || null,
+              type: data.type || coaster.type
+            });
+          }
+        })
+        .catch(() => {});
     }
   }, [coaster, onUpdate]);
 
@@ -828,8 +1043,12 @@ function CoasterImage({ coaster, onUpdate }) {
     const m = getManufacturerInfo(coaster.type);
     return (
       <div className="cr-img-wrap cr-chip" style={{ background: m.bg }}>
-        <div className="cr-chip-label" style={{ color: m.fg }}>{m.label}</div>
-        <div className="cr-chip-sub" style={{ color: m.fg, opacity: 0.7 }}>{coaster.type}</div>
+        <div className="cr-chip-label" style={{ color: m.fg }}>
+          {m.label}
+        </div>
+        <div className="cr-chip-sub" style={{ color: m.fg, opacity: 0.7 }}>
+          {coaster.type}
+        </div>
       </div>
     );
   }
@@ -853,14 +1072,29 @@ function CompareView({ left, right, onChoose, keyPulse, onUpdateCoaster }) {
 
   return (
     <div className="cr-fadein" key={keyPulse}>
-      <div className="cr-meta" style={{ textAlign: 'center', marginBottom: 16, letterSpacing: '0.3em' }}>
+      <div
+        className="cr-meta"
+        style={{ textAlign: 'center', marginBottom: 16, letterSpacing: '0.3em' }}
+      >
         Which ride wins?
       </div>
 
       <div className="cr-pair">
-        <CoasterCardFull coaster={left} side="L" onClick={() => onChoose('l')} onFix={() => setFixTarget(left)} onUpdate={onUpdateCoaster} />
+        <CoasterCardFull
+          coaster={left}
+          side="L"
+          onClick={() => onChoose('l')}
+          onFix={() => setFixTarget(left)}
+          onUpdate={onUpdateCoaster}
+        />
         <div className="cr-vs">vs</div>
-        <CoasterCardFull coaster={right} side="R" onClick={() => onChoose('r')} onFix={() => setFixTarget(right)} onUpdate={onUpdateCoaster} />
+        <CoasterCardFull
+          coaster={right}
+          side="R"
+          onClick={() => onChoose('r')}
+          onFix={() => setFixTarget(right)}
+          onUpdate={onUpdateCoaster}
+        />
       </div>
 
       <style>{`
@@ -880,10 +1114,10 @@ function CompareView({ left, right, onChoose, keyPulse, onUpdateCoaster }) {
         }
         .cr-card:hover .cr-fix-btn { opacity: 1; }
       `}</style>
-      
+
       {fixTarget && (
-        <FixDialog 
-          coaster={fixTarget} 
+        <FixDialog
+          coaster={fixTarget}
           onClose={() => setFixTarget(null)}
           onSave={(updates) => {
             onUpdateCoaster(fixTarget.id, updates);
@@ -898,24 +1132,56 @@ function CompareView({ left, right, onChoose, keyPulse, onUpdateCoaster }) {
 function FixDialog({ coaster, onClose, onSave }) {
   const [type, setType] = useState(coaster.type || '');
   const [image, setImage] = useState('');
-  
+
   return (
-    <div className="cr-modal-bg" onClick={onClose} style={{zIndex: 9999}}>
+    <div className="cr-modal-bg" onClick={onClose} style={{ zIndex: 9999 }}>
       <div className="cr-modal" onClick={e => e.stopPropagation()}>
-        <h3 className="cr-display" style={{ fontSize: 22, letterSpacing: '0.05em', margin: '0 0 12px' }}>FIX COASTER</h3>
+        <h3
+          className="cr-display"
+          style={{ fontSize: 22, letterSpacing: '0.05em', margin: '0 0 12px' }}
+        >
+          FIX COASTER
+        </h3>
         <p className="cr-text-soft" style={{ fontSize: 12, margin: '0 0 20px', lineHeight: 1.5 }}>
-          Description incorrect? Image missing? Update it here. You can paste an image URL to replace the missing or incorrect image.
+          Description incorrect? Image missing? Update it here. You can paste an image URL to
+          replace the missing or incorrect image.
         </p>
-        
-        <div className="cr-meta" style={{marginBottom: 4}}>Type / Manufacturer</div>
-        <input className="cr-input" value={type} onChange={e => setType(e.target.value)} placeholder="e.g. B&M Hyper" />
-        
-        <div className="cr-meta" style={{marginBottom: 4}}>Image URL (optional)</div>
-        <input className="cr-input" value={image} onChange={e => setImage(e.target.value)} placeholder="https://..." />
-        
+
+        <div className="cr-meta" style={{ marginBottom: 4 }}>
+          Type / Manufacturer
+        </div>
+        <input
+          className="cr-input"
+          value={type}
+          onChange={e => setType(e.target.value)}
+          placeholder="e.g. B&M Hyper"
+        />
+
+        <div className="cr-meta" style={{ marginBottom: 4 }}>
+          Image URL (optional)
+        </div>
+        <input
+          className="cr-input"
+          value={image}
+          onChange={e => setImage(e.target.value)}
+          placeholder="https://..."
+        />
+
         <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-          <button onClick={onClose} className="cr-btn" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
-          <button onClick={() => onSave({type, image: image || coaster.image})} className="cr-btn primary" style={{ flex: 1, justifyContent: 'center' }}>Save</button>
+          <button
+            onClick={onClose}
+            className="cr-btn"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onSave({ type, image: image || coaster.image })}
+            className="cr-btn primary"
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -924,7 +1190,7 @@ function FixDialog({ coaster, onClose, onSave }) {
 
 function CoasterCardFull({ coaster, side, onClick, onFix, onUpdate }) {
   return (
-    <div style={{position: 'relative', display: 'flex'}}>
+    <div style={{ position: 'relative', display: 'flex' }}>
       <button className="cr-card" onClick={onClick}>
         <CoasterImage coaster={coaster} onUpdate={onUpdate} />
         <div className="cr-card-body">
@@ -935,7 +1201,13 @@ function CoasterCardFull({ coaster, side, onClick, onFix, onUpdate }) {
           <div className="cr-card-type">{coaster.type}</div>
           <div className="cr-card-park">{coaster.park}</div>
         </div>
-        <div className="cr-fix-btn" onClick={(e) => { e.stopPropagation(); onFix(); }}>
+        <div
+          className="cr-fix-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFix();
+          }}
+        >
           <Edit3 size={10} /> Fix Info
         </div>
       </button>
@@ -951,10 +1223,16 @@ function StandingsView({ state, onBack, coasters }) {
         <button onClick={onBack} className="cr-btn" style={{ marginBottom: 18 }}>
           <ArrowLeft size={12} /> Back to comparisons
         </button>
-        <h2 className="cr-headline" style={{ margin: '0 0 8px' }}>CURRENT LEADERBOARD</h2>
-        <p className="cr-text-soft" style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 22, maxWidth: 600 }}>
+        <h2 className="cr-headline" style={{ margin: '0 0 8px' }}>
+          CURRENT LEADERBOARD
+        </h2>
+        <p
+          className="cr-text-soft"
+          style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 22, maxWidth: 600 }}
+        >
           These are the {state.topK.length} coasters that have survived so far, in current order.
-          {remaining > 0 ? ` ${remaining} more to evaluate.` : ''} The bottom of this list can still be displaced.
+          {remaining > 0 ? ` ${remaining} more to evaluate.` : ''} The bottom of this list can still
+          be displaced.
         </p>
         <ol style={{ margin: 0, padding: 0, listStyle: 'none' }}>
           {state.topK.map((c, i) => (
@@ -987,9 +1265,15 @@ function StandingsView({ state, onBack, coasters }) {
       <button onClick={onBack} className="cr-btn" style={{ marginBottom: 18 }}>
         <ArrowLeft size={12} /> Back to comparisons
       </button>
-      <h2 className="cr-headline" style={{ margin: '0 0 8px' }}>PARTIAL STANDINGS</h2>
-      <p className="cr-text-soft" style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 22, maxWidth: 600 }}>
-        Mid-sort, your ranking exists as several sorted groups. The longest is your best partial estimate.
+      <h2 className="cr-headline" style={{ margin: '0 0 8px' }}>
+        PARTIAL STANDINGS
+      </h2>
+      <p
+        className="cr-text-soft"
+        style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 22, maxWidth: 600 }}
+      >
+        Mid-sort, your ranking exists as several sorted groups. The longest is your best partial
+        estimate.
       </p>
       <div style={{ marginBottom: 28 }}>
         <div className="cr-meta" style={{ marginBottom: 12 }}>
@@ -1008,10 +1292,22 @@ function StandingsView({ state, onBack, coasters }) {
       </div>
       {runs.length > 1 && (
         <div>
-          <div className="cr-meta" style={{ marginBottom: 10 }}>Other groups · {runs.length - 1}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8 }}>
+          <div className="cr-meta" style={{ marginBottom: 10 }}>
+            Other groups · {runs.length - 1}
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
+              gap: 8
+            }}
+          >
             {runs.slice(1).map((r, i) => (
-              <div key={i} className="cr-meta" style={{ border: '1px solid var(--border)', padding: '6px 10px', opacity: 0.6 }}>
+              <div
+                key={i}
+                className="cr-meta"
+                style={{ border: '1px solid var(--border)', padding: '6px 10px', opacity: 0.6 }}
+              >
                 Group of {r.length}
               </div>
             ))}
@@ -1022,14 +1318,28 @@ function StandingsView({ state, onBack, coasters }) {
   );
 }
 
-function FinalView({ ranking, mode, k, totalN, count, onCopy, onCopyCSV, copied, onReset, onUndo, onRankMore }) {
+function FinalView({
+  ranking,
+  mode,
+  k,
+  totalN,
+  count,
+  onCopy,
+  onCopyCSV,
+  copied,
+  onReset,
+  onUndo,
+  onRankMore
+}) {
   const [tab, setTab] = useState('full');
   if (!ranking || ranking.length === 0) {
     return (
       <div className="cr-fadein">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
           <Trophy size={28} className="cr-text-amber" />
-          <h2 className="cr-display" style={{ fontSize: 38, letterSpacing: '0.05em', margin: 0 }}>NOTHING TO RANK</h2>
+          <h2 className="cr-display" style={{ fontSize: 38, letterSpacing: '0.05em', margin: 0 }}>
+            NOTHING TO RANK
+          </h2>
         </div>
         <p className="cr-text-soft" style={{ fontSize: 14, marginBottom: 24, maxWidth: 560 }}>
           The COASTERS list is empty. Add entries and reload.
@@ -1044,12 +1354,14 @@ function FinalView({ ranking, mode, k, totalN, count, onCopy, onCopyCSV, copied,
   const isTopK = mode === 'topK';
   const filteredOut = isTopK ? Math.max(0, (totalN || 0) - ranking.length) : 0;
   const heading = isTopK ? `TOP ${ranking.length}` : 'FINAL RANKING';
-  
+
   return (
     <div className="cr-fadein">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
         <Trophy size={28} className="cr-text-amber" />
-        <h2 className="cr-display" style={{ fontSize: 38, letterSpacing: '0.05em', margin: 0 }}>{heading}</h2>
+        <h2 className="cr-display" style={{ fontSize: 38, letterSpacing: '0.05em', margin: 0 }}>
+          {heading}
+        </h2>
       </div>
       <p className="cr-meta" style={{ marginBottom: filteredOut ? 6 : 24 }}>
         {count} comparisons · {ranking.length} coaster{ranking.length === 1 ? '' : 's'} ranked
@@ -1062,10 +1374,36 @@ function FinalView({ ranking, mode, k, totalN, count, onCopy, onCopyCSV, copied,
 
       {ranking.length > 10 && (
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
-          <button onClick={() => setTab('full')} className={`cr-btn ${tab === 'full' ? 'primary' : ''}`}>Full List</button>
-          {ranking.length >= 50 && <button onClick={() => setTab('50')} className={`cr-btn ${tab === '50' ? 'primary' : ''}`}>Top 50</button>}
-          {ranking.length >= 25 && <button onClick={() => setTab('25')} className={`cr-btn ${tab === '25' ? 'primary' : ''}`}>Top 25</button>}
-          {ranking.length >= 10 && <button onClick={() => setTab('10')} className={`cr-btn ${tab === '10' ? 'primary' : ''}`}>Top 10</button>}
+          <button
+            onClick={() => setTab('full')}
+            className={`cr-btn ${tab === 'full' ? 'primary' : ''}`}
+          >
+            Full List
+          </button>
+          {ranking.length >= 50 && (
+            <button
+              onClick={() => setTab('50')}
+              className={`cr-btn ${tab === '50' ? 'primary' : ''}`}
+            >
+              Top 50
+            </button>
+          )}
+          {ranking.length >= 25 && (
+            <button
+              onClick={() => setTab('25')}
+              className={`cr-btn ${tab === '25' ? 'primary' : ''}`}
+            >
+              Top 25
+            </button>
+          )}
+          {ranking.length >= 10 && (
+            <button
+              onClick={() => setTab('10')}
+              className={`cr-btn ${tab === '10' ? 'primary' : ''}`}
+            >
+              Top 10
+            </button>
+          )}
         </div>
       )}
 
@@ -1078,64 +1416,97 @@ function FinalView({ ranking, mode, k, totalN, count, onCopy, onCopyCSV, copied,
 
         return (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 10, marginBottom: 32 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gap: 10,
+                marginBottom: 32
+              }}
+            >
               {podium.map(i => {
                 const c = displayRank[i];
                 const cls = i === 0 ? 'gold' : i === 1 ? 'silver' : 'bronze';
-                const num = i === 0 ? 'cr-text-amber' : i === 1 ? 'cr-text-silver' : 'cr-text-bronze';
+                const num =
+                  i === 0 ? 'cr-text-amber' : i === 1 ? 'cr-text-silver' : 'cr-text-bronze';
                 return (
                   <div key={c.id} className={`cr-podium ${cls}`}>
                     <CoasterImage coaster={c} onUpdate={noopUpdate} />
                     <div className="cr-podium-body">
-                <div className={`cr-display ${num}`} style={{ fontSize: 48, letterSpacing: '0.05em', lineHeight: 1, marginBottom: 6 }}>
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <div className="cr-display" style={{ fontSize: 22, lineHeight: 1.05, marginBottom: 6, letterSpacing: '0.02em' }}>
-                  {c.name}
-                </div>
-                <div className="cr-meta cr-text-amber" style={{ marginBottom: 4 }}>{c.type}</div>
-                <div className="cr-meta">{c.park}</div>
+                      <div
+                        className={`cr-display ${num}`}
+                        style={{
+                          fontSize: 48,
+                          letterSpacing: '0.05em',
+                          lineHeight: 1,
+                          marginBottom: 6
+                        }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </div>
+                      <div
+                        className="cr-display"
+                        style={{
+                          fontSize: 22,
+                          lineHeight: 1.05,
+                          marginBottom: 6,
+                          letterSpacing: '0.02em'
+                        }}
+                      >
+                        {c.name}
+                      </div>
+                      <div className="cr-meta cr-text-amber" style={{ marginBottom: 4 }}>
+                        {c.type}
+                      </div>
+                      <div className="cr-meta">{c.park}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <ol style={{ margin: 0, padding: 0, listStyle: 'none', marginBottom: 24 }}>
+              {displayRank.slice(3).map((c, i) => (
+                <li key={c.id} className="cr-rank-row">
+                  <span className="cr-rank-num">{String(i + 4).padStart(3, '0')}</span>
+                  <span className="cr-rank-name">{c.name}</span>
+                  <span className="cr-rank-type">{c.type}</span>
+                  <span className="cr-rank-park">{c.park}</span>
+                </li>
+              ))}
+            </ol>
+
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 10,
+                justifyContent: 'space-between'
+              }}
+            >
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                <button onClick={onCopy} className="cr-btn primary">
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? 'Copied' : 'Copy text'}
+                </button>
+                <button onClick={onCopyCSV} className="cr-btn">
+                  <Copy size={14} /> Copy CSV
+                </button>
+                <button onClick={onUndo} className="cr-btn">
+                  <Undo2 size={14} /> Undo last
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {onRankMore && mode === 'topK' && (
+                  <button onClick={onRankMore} className="cr-btn primary">
+                    <ListOrdered size={14} /> Rank more
+                  </button>
+                )}
+                <button onClick={onReset} className="cr-btn danger">
+                  <RotateCcw size={14} /> Start over
+                </button>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      <ol style={{ margin: 0, padding: 0, listStyle: 'none', marginBottom: 24 }}>
-        {displayRank.slice(3).map((c, i) => (
-          <li key={c.id} className="cr-rank-row">
-            <span className="cr-rank-num">{String(i + 4).padStart(3, '0')}</span>
-            <span className="cr-rank-name">{c.name}</span>
-            <span className="cr-rank-type">{c.type}</span>
-            <span className="cr-rank-park">{c.park}</span>
-          </li>
-        ))}
-      </ol>
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          <button onClick={onCopy} className="cr-btn primary">
-            {copied ? <Check size={14} /> : <Copy size={14} />}
-            {copied ? 'Copied' : 'Copy text'}
-          </button>
-          <button onClick={onCopyCSV} className="cr-btn">
-            <Copy size={14} /> Copy CSV
-          </button>
-          <button onClick={onUndo} className="cr-btn">
-            <Undo2 size={14} /> Undo last
-          </button>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          {onRankMore && mode === 'topK' && (
-            <button onClick={onRankMore} className="cr-btn primary">
-              <ListOrdered size={14} /> Rank more
-            </button>
-          )}
-          <button onClick={onReset} className="cr-btn danger">
-            <RotateCcw size={14} /> Start over
-          </button>
-        </div>
-      </div>
           </>
         );
       })()}
@@ -1152,7 +1523,9 @@ function formatRanking(ranking, mode, k) {
 function formatCSV(ranking, mode, k) {
   const lines = ['Rank,Coaster,Type,Park'];
   ranking.forEach((c, i) => {
-    const q = s => (typeof s === 'string' && (s.includes(',') || s.includes('"'))) ? `"${s.replace(/"/g, '""')}"` : s;
+    const q = s => (typeof s === 'string' && (s.includes(',') || s.includes('"')))
+      ? `"${s.replace(/"/g, '""')}"`
+      : s;
     lines.push(`${i + 1},${q(c.name)},${q(c.type)},${q(c.park)}`);
   });
   return lines.join('\n');
@@ -1170,6 +1543,8 @@ function fallbackCopy(text) {
   ta.style.opacity = '0';
   document.body.appendChild(ta);
   ta.select();
-  try { document.execCommand('copy'); } catch (e) {}
+  try {
+    document.execCommand('copy');
+  } catch (e) {}
   document.body.removeChild(ta);
 }

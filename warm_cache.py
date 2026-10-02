@@ -483,6 +483,7 @@ def repick_blank():
             still += 1
             print(f"  = {qkey}: no RCDB page on record")
             continue
+
         rejected = {r[0] for r in b.db_query("SELECT src FROM rejects")}
         try:
             html = b._get_text(b.RCDB + rcdb_path)
@@ -490,6 +491,7 @@ def repick_blank():
             still += 1
             print(f"  ! {qkey}: {e}")
             continue
+
         img_path, w, h = b.extract_best_image(html, exclude=rejected)
         ckey = None
         if img_path:
@@ -497,6 +499,7 @@ def repick_blank():
                 ckey = b.cache_image(b.RCDB + img_path)
             except Exception:
                 ckey = None
+
         b.db_write("INSERT OR REPLACE INTO lookup VALUES (?,?,?,?,?)",
                    (qkey, ckey, ctype, rcdb_path, int(time.time())))
         if ckey:
@@ -523,9 +526,11 @@ def reencode_all():
         if not src:
             skipped += 1
             continue
+
         old_path = os.path.join(b.IMAGE_DIR, f"{ckey}.{old_ext}")
         if os.path.isfile(old_path):
             before += os.path.getsize(old_path)
+
         raw = open(src[0], "rb").read()
         data, ext = b._encode(raw)
         new_path = os.path.join(b.IMAGE_DIR, f"{ckey}.{ext}")
@@ -535,25 +540,30 @@ def reencode_all():
         os.replace(tmp, new_path)
         if ext != old_ext and os.path.isfile(old_path):
             os.remove(old_path)
+
         w = h = 0
         try:
             with Image.open(io.BytesIO(data)) as probe:
                 w, h = probe.size
         except Exception:
             pass
+
         b.db_write("UPDATE images SET ext=?, bytes=?, width=?, height=? WHERE ckey=?",
                    (ext, len(data), w, h, ckey))
         after += len(data)
         done += 1
         print(f"  {done}/{len(rows)}  {ckey}  {len(data)/1024:>6.0f} KB  {w}x{h}")
+
     print(f"\nre-encoded {done}, skipped {skipped} (no stored original)")
     if before:
-        print(f"{before/1048576:.0f} MB -> {after/1048576:.0f} MB  ({after/before*100:.0f}% of previous)")
+        print(f"{before/1048576:.0f} MB -> {after/1048576:.0f} MB  "
+              f"({after/before*100:.0f}% of previous)")
 
 
 def warm_park(park_name, pinned=None, dry_run=False, limit=None, refresh=False):
     rcdb_name, rows = park_listing(park_name, pinned)
-    label = f"{park_name}" + (f"  (RCDB: {rcdb_name})" if rcdb_name and rcdb_name != park_name else "")
+    label = f"{park_name}" + (f"  (RCDB: {rcdb_name})"
+                              if rcdb_name and rcdb_name != park_name else "")
     if not rows:
         print(f"  {label}: no coasters found")
         return 0, 0, 0
@@ -608,7 +618,8 @@ def main():
                     help="re-derive cached images from stored originals after changing "
                          "IMAGE_FORMAT/MAX_WIDTH (no network)")
     ap.add_argument("--refresh", action="store_true",
-                    help="re-pick images for coasters already cached (e.g. after changing the scorer)")
+                    help="re-pick images for coasters already cached "
+                         "(e.g. after changing the scorer)")
     args = ap.parse_args()
 
     if args.repick_blank:
@@ -638,7 +649,8 @@ def main():
     if args.parks:
         targets = [(p.strip(), p.strip(), None) for p in args.parks.split(",") if p.strip()]
     else:
-        keys = list(CHAINS) if args.all else [k.strip() for k in (args.chains or "").split(",") if k.strip()]
+        keys = (list(CHAINS) if args.all
+                else [k.strip() for k in (args.chains or "").split(",") if k.strip()])
         if not keys:
             ap.error("give me --chains, --parks, or --all (or --list to see what's available)")
         unknown = [k for k in keys if k not in CHAINS]

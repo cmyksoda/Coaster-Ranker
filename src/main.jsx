@@ -24,10 +24,16 @@ class ErrorBoundary extends React.Component {
     return (
       <div className="cr-app" style={{ padding: '40px 20px' }}>
         <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <h1 className="cr-display" style={{ fontSize: 34, letterSpacing: '0.05em', margin: '0 0 10px' }}>
+          <h1
+            className="cr-display"
+            style={{ fontSize: 34, letterSpacing: '0.05em', margin: '0 0 10px' }}
+          >
             SOMETHING BROKE
           </h1>
-          <p className="cr-text-soft" style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 18 }}>
+          <p
+            className="cr-text-soft"
+            style={{ fontSize: 14, lineHeight: 1.5, marginBottom: 18 }}
+          >
             Your ranking progress is saved. Reload the page to pick up where you left off.
           </p>
           <pre className="cr-mono" style={{
@@ -35,9 +41,14 @@ class ErrorBoundary extends React.Component {
             border: '1px solid var(--border)', background: 'var(--surface)',
             padding: 14, marginBottom: 18,
           }}>
-            {String(this.state.error && (this.state.error.stack || this.state.error.message || this.state.error))}
+            {String(
+              this.state.error
+              && (this.state.error.stack || this.state.error.message || this.state.error)
+            )}
           </pre>
-          <button className="cr-btn primary" onClick={() => window.location.reload()}>Reload</button>
+          <button className="cr-btn primary" onClick={() => window.location.reload()}>
+            Reload
+          </button>
         </div>
       </div>
     )
