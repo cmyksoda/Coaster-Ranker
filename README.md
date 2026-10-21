@@ -40,8 +40,18 @@ Each visitor's coaster list and ranking live only in their own browser (localSto
 docker exec -it coaster-ranker python3 /app/warm_cache.py --reencode
 ```
 
-Coaster data and photography come from [RCDB](https://rcdb.com), with Coasterpedia and Wikipedia as fallbacks.  
-Color schemes are [Catppuccin](https://github.com/catppuccin) Latte (Light) and Mocha (Dark).
+## Credits
+
+- **[Claude-Pairwise-Coaster-Ranker](https://github.com/coasterrankerburner-gif/Claude-Pairwise-Coaster-Ranker)** by coasterrankerburner-gif, which this project is derived from
+- **[RCDB](https://rcdb.com)**, the Roller Coaster DataBase, for the coaster data and photography, with Coasterpedia and Wikipedia as fallbacks
+- **[Catppuccin](https://github.com/catppuccin)**, for the Latte (light) and Mocha (dark) color schemes
+- **Bebas Neue** by Ryoichi Tsunekawa, **DM Sans** by the DM Sans Project Authors (Colophon Foundry), and **JetBrains Mono** by JetBrains, the typefaces, loaded from Google Fonts
+- **React** by Meta and contributors, **Vite** by Evan You and contributors, **Lucide** icons by the Lucide contributors, **PapaParse** by Matt Holt and contributors, and **react-dropzone** by Param Aggarwal and contributors, for the interface and list importing
+- **FastAPI** by Sebastián Ramírez, **Uvicorn** by Tom Christie and contributors, and **Pillow** by Jeffrey "Alex" Clark and contributors, for the image server
+
+## License
+
+Coaster Ranker is free software under the [GNU Affero General Public License, version 3](LICENSE).
 
 ---
 
